@@ -1,0 +1,12 @@
+schema_version = "1.0.0"
+id = "parametric_splines"
+version = "0.1.0"
+name = "Parametric Splines"
+tagline = "Persistent non-destructive curve primitives"
+maintainer = "Bryan Leister"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+license = ["SPDX:MIT"]
+
+tags = ["Add Curve", "Geometry Nodes", "Modeling"]

@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Blender runtime files
+*.blend1
+*.blend2
+*.blend@
+*.blend[0-9]
+*.blend[0-9][0-9]
+*.autosave.blend
+
+# Local editor and OS files
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local test output
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+
+# Keep built extension packages in git when intentionally created.
+!parametric_splines-*.zip
