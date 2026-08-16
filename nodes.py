@@ -8,7 +8,7 @@ from .primitives import Parameter, PrimitiveSpec
 
 GROUP_INPUT_X = -240
 GROUP_OUTPUT_X = 520
-GROUP_VERSION = 4
+GROUP_VERSION = 7
 
 
 def ensure_node_group(spec: PrimitiveSpec):

@@ -1,13 +1,13 @@
-"""Parametric Splines Blender extension."""
+"""Parametric Curves Blender extension."""
 
 from . import operators
 
 bl_info = {
-    "name": "Parametric Splines",
+    "name": "Parametric Curves",
     "author": "Bryan Leister",
     "version": (0, 1, 0),
     "blender": (4, 2, 0),
-    "location": "Add > Curve > Parametric Splines",
+    "location": "Add > Curve",
     "description": "Persistent, non-destructive curve primitives with modifier controls.",
     "category": "Add Curve",
 }

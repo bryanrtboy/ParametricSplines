@@ -24,4 +24,4 @@ __pycache__/
 htmlcov/
 
 # Keep built extension packages in git when intentionally created.
-!parametric_splines-*.zip
+!parametric_curves-*.zip

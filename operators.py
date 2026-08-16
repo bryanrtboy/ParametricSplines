@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import bpy
 from bpy.app.handlers import persistent
-from bpy.types import Menu, Operator
+from bpy.types import Operator
 
 from .nodes import ensure_node_group, modifier_values, set_modifier_defaults
 from .primitives import SPECS, SPECS_BY_KEY, generate_points
 
-MODIFIER_NAME = "Parametric Spline"
+MODIFIER_NAME = "Parametric Curve"
 OBJECT_KIND_PROP = "ps_primitive"
 SIGNATURE_PROP = "ps_signature"
 UPDATING = False
@@ -47,13 +47,13 @@ def update_curve_object(obj) -> None:
         return
 
     spec = SPECS_BY_KEY[kind]
-    obj.data.dimensions = spec.dimensions
-    obj.data.fill_mode = _fill_mode_for_dimensions(spec.dimensions)
     values = modifier_values(modifier, spec)
     signature = repr((kind, tuple(sorted(values.items()))))
     if obj.get(SIGNATURE_PROP) == signature:
         return
 
+    obj.data.dimensions = spec.dimensions
+    obj.data.fill_mode = _fill_mode_for_dimensions(spec.dimensions)
     points, cyclic = generate_points(kind, values)
     _replace_curve_spline(obj.data, points, cyclic)
     obj[SIGNATURE_PROP] = signature
@@ -68,6 +68,7 @@ def _replace_curve_spline(curve, points, cyclic: bool) -> None:
     for point, co in zip(spline.points, points):
         point.co = (co[0], co[1], co[2], 1.0)
     spline.use_cyclic_u = cyclic
+    spline.use_smooth = False
 
 
 def _fill_mode_for_dimensions(dimensions: str) -> str:
@@ -82,8 +83,8 @@ def _parametric_modifier(obj):
 
 
 class PARAMETRIC_SPLINES_OT_add(Operator):
-    bl_idname = "curve.parametric_spline_add"
-    bl_label = "Add Parametric Spline"
+    bl_idname = "curve.parametric_curve_add"
+    bl_label = "Add Parametric Curve"
     bl_options = {"REGISTER", "UNDO"}
 
     primitive: bpy.props.EnumProperty(
@@ -96,19 +97,13 @@ class PARAMETRIC_SPLINES_OT_add(Operator):
         return {"FINISHED"}
 
 
-class PARAMETRIC_SPLINES_MT_menu(Menu):
-    bl_label = "Parametric Splines"
-    bl_idname = "PARAMETRIC_SPLINES_MT_menu"
-
-    def draw(self, context):
-        layout = self.layout
-        for spec in SPECS:
-            operator = layout.operator(PARAMETRIC_SPLINES_OT_add.bl_idname, text=spec.label)
-            operator.primitive = spec.key
-
-
 def curve_add_menu(self, context):
-    self.layout.menu(PARAMETRIC_SPLINES_MT_menu.bl_idname)
+    layout = self.layout
+    layout.label(text="Parametric Curves", icon="CURVE_DATA")
+    for spec in SPECS:
+        operator = layout.operator(PARAMETRIC_SPLINES_OT_add.bl_idname, text=spec.label)
+        operator.primitive = spec.key
+    layout.separator()
 
 
 @persistent
@@ -144,9 +139,7 @@ def _updated_parametric_objects(scene, depsgraph):
 
     for update in depsgraph.updates:
         datablock = update.id
-        if isinstance(datablock, bpy.types.Object):
-            add_object(datablock)
-        elif isinstance(datablock, bpy.types.Curve):
+        if isinstance(datablock, bpy.types.Curve):
             for obj in scene.objects:
                 if obj.type == "CURVE" and obj.data == datablock:
                     add_object(obj)
@@ -161,14 +154,13 @@ def _updated_parametric_objects(scene, depsgraph):
 
 classes = (
     PARAMETRIC_SPLINES_OT_add,
-    PARAMETRIC_SPLINES_MT_menu,
 )
 
 
 def register():
     for cls in classes:
         bpy.utils.register_class(cls)
-    bpy.types.VIEW3D_MT_curve_add.append(curve_add_menu)
+    bpy.types.VIEW3D_MT_curve_add.prepend(curve_add_menu)
     if depsgraph_update not in bpy.app.handlers.depsgraph_update_post:
         bpy.app.handlers.depsgraph_update_post.append(depsgraph_update)
     if not bpy.app.timers.is_registered(timer_update):
